@@ -37,6 +37,6 @@ describe('pos', function () {
             '节省：7.50(元)\n' +
             '**********************';
 
-          expect(console.log).toHaveBeenCalledWith(expectText);
+        expect(console.log).toHaveBeenCalledWith(expectText);
     });
 });
