@@ -1,6 +1,6 @@
 // Spartan
 
-var PROMOTION_HANDLER_SET = {
+const PROMOTION_HANDLER_SET = {
     BUY_TWO_GET_ONE_FREE: function (promotionInfo, purchasesList, promotionsList) {
         // itemsBSMap is a map of Barcode <=> Sum
         const itemsBSMap = purchasesList.getMap();
