@@ -2,11 +2,11 @@
 
 const PROMOTION_HANDLER_SET = {
     BUY_TWO_GET_ONE_FREE: function (promotionInfo, purchasesList, promotionsList) {
-        // itemsBSMap is a map of Barcode <=> Sum
-        const itemsBSMap = purchasesList.getMap();
-        for (var itemCode in itemsBSMap) {
+        // mapItemsBS is a map of Barcode <=> Sum
+        const mapItemsBS = purchasesList.getMap();
+        for (var itemCode in mapItemsBS) {
             if (promotionInfo.barcodes.indexOf(itemCode) > 0) {
-                promotionsList.add(itemCode, Math.floor(itemsBSMap[itemCode] / 3));
+                promotionsList.add(itemCode, Math.floor(mapItemsBS[itemCode] / 3));
             }
         }
     },
@@ -14,6 +14,10 @@ const PROMOTION_HANDLER_SET = {
 
     }
 };
+
+function outputRealFormat(p) {
+    return p.toFixed(2);
+}
 
 function ProductList() {
     // mapItemBS is a map of Barcode <=> Sum
@@ -60,17 +64,17 @@ function ProductList() {
     };
 
     this.toString = function (discountList) {
-        var rtnStr = '';
+        var strRtn = '';
         for (var key in mapItemBS) {
             var currentProduceInfo = this.findProduceByBarcode(key);
-            rtnStr += '名称：' + currentProduceInfo.name + '，数量：' + mapItemBS[key] + currentProduceInfo.unit;
+            strRtn += '名称：' + currentProduceInfo.name + '，数量：' + mapItemBS[key] + currentProduceInfo.unit;
             if (discountList != null) {
-                rtnStr += '，单价：' + currentProduceInfo.price.toFixed(2) + '(元)，小计：';
-                rtnStr += (currentProduceInfo.price * (this.getSum(key) - discountList.getSum(key))).toFixed(2) + '(元)';
+                strRtn += '，单价：' + outputRealFormat(currentProduceInfo.price) + '(元)，小计：';
+                strRtn += outputRealFormat(currentProduceInfo.price * (this.getSum(key) - discountList.getSum(key))) + '(元)';
             }
-            rtnStr += '\n';
+            strRtn += '\n';
         }
-        return rtnStr;
+        return strRtn;
     };
 
     this.calcTotalPrice = function (discountList) {
@@ -119,19 +123,19 @@ function generatePromotionsList(purchasesList) {
 }
 
 function printInventory(purchasesStream) {
-    var listBuy = generatePurchaseList(purchasesStream);
-    var listExtra = generatePromotionsList(listBuy);
-    var rtnStr = '';
-    rtnStr += '***<没钱赚商店>购物清单***\n';
-    rtnStr += listBuy.toString(listExtra);
-    rtnStr += '----------------------\n';
-    rtnStr += '挥泪赠送商品：\n';
-    rtnStr += listExtra.toString();
-    rtnStr += '----------------------\n';
-    rtnStr += '总计：' + listBuy.calcTotalPrice(listExtra).toFixed(2) + '(元)\n';
-    rtnStr += '节省：' + listExtra.calcTotalPrice().toFixed(2) + '(元)\n';
-    rtnStr += '**********************';
+    var buyList = generatePurchaseList(purchasesStream);
+    var extraList = generatePromotionsList(buyList);
+    var strRtn = '';
+    strRtn += '***<没钱赚商店>购物清单***\n';
+    strRtn += buyList.toString(extraList);
+    strRtn += '----------------------\n';
+    strRtn += '挥泪赠送商品：\n';
+    strRtn += extraList.toString();
+    strRtn += '----------------------\n';
+    strRtn += '总计：' + outputRealFormat(buyList.calcTotalPrice(extraList)) + '(元)\n';
+    strRtn += '节省：' + outputRealFormat(extraList.calcTotalPrice()) + '(元)\n';
+    strRtn += '**********************';
 
-    console.log(rtnStr);
-    return rtnStr;
+    console.log(strRtn);
+    return strRtn;
 }
