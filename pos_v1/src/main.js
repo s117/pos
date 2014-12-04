@@ -77,11 +77,10 @@ function ProductList() {
         var totalPrice = 0.00;
         for (var key in mapItemBS) {
             var currentProduceInfo = this.findProduceByBarcode(key);
-            if ((discountList != null)) {
-                totalPrice += (this.getSum(key) - discountList.getSum(key)) * currentProduceInfo.price;
-                continue;
-            }
             totalPrice += this.getSum(key) * currentProduceInfo.price;
+            if (discountList != null) {
+                totalPrice -= discountList.getSum(key) * currentProduceInfo.price;
+            }
         }
         return totalPrice;
     };
@@ -93,15 +92,16 @@ function generatePurchaseList(purchasesStream) {
     for (var key in purchasesStream) {
         var strListItem = purchasesStream[key];
         var arrSplit = strListItem.split('-');
+
+        if ((arrSplit.length != 1) && (arrSplit.length != 2)) {
+            throw new Error('Input stream format invalid: ' + purchasesStream[key]);
+        }
         if (arrSplit.length == 1) {
             rtnList.add(arrSplit[0], 1);
-            continue;
         }
         if (arrSplit.length == 2) {
             rtnList.add(arrSplit[0], parseInt(arrSplit[1], 10));
-            continue;
         }
-        throw new Error('Input stream format invalid: ' + purchasesStream[key]);
     }
     return rtnList;
 }
@@ -110,11 +110,10 @@ function generatePromotionsList(purchasesList) {
     var promotionsList = new ProductList();
     var arrPromotionsInfo = loadPromotions();
     for (var key in arrPromotionsInfo) {
-        if (arrPromotionsInfo[key].type in PROMOTION_HANDLER_SET) {
-            PROMOTION_HANDLER_SET[arrPromotionsInfo[key].type](arrPromotionsInfo[key], purchasesList, promotionsList);
-            continue;
+        if (!(arrPromotionsInfo[key].type in PROMOTION_HANDLER_SET)) {
+            throw new Error('No promotion handler defined for label: ' + arrPromotionsInfo[key].type);
         }
-        throw new Error('No promotion handler defined for label: ' + arrPromotionsInfo[key].type);
+        PROMOTION_HANDLER_SET[arrPromotionsInfo[key].type](arrPromotionsInfo[key], purchasesList, promotionsList);
     }
     return promotionsList;
 }
